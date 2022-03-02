@@ -1,3 +1,6 @@
+import urllib.parse
+
+from doajtest.fixtures import JournalFixtureFactory, ArticleFixtureFactory
 from doajtest.helpers import DoajTestCase
 from portality import models
 from portality.api.current import DiscoveryApi, DiscoveryException
@@ -467,3 +470,49 @@ class TestAPIDiscovery(DoajTestCase):
 
         for t in test_tuples:
             assert escape(t[0]) == t[1], "expected {0} got {1}".format(t[1], t[0])
+
+    def test_08_params_in_payload(self):
+        # Seed the index with a journal and some articles
+        j_indoaj_source = JournalFixtureFactory.make_journal_source(in_doaj=True)
+        j_indoaj = models.Journal(**j_indoaj_source)
+        j_indoaj.save(blocking=True)
+
+        j_indoaj_arts = ArticleFixtureFactory.make_many_article_sources(2, in_doaj=True,
+                                                                                  pissn=j_indoaj.bibjson().first_pissn,
+                                                                                  eissn=j_indoaj.bibjson().first_eissn)
+        [models.Article(**m).save(blocking=True) for m in j_indoaj_arts]
+
+        a = j_indoaj_arts.pop()
+        a_title = a['bibjson']['title']
+        a_doi = a['id']
+
+        # now run some queries
+        with self.app_test.test_request_context():
+            with self.app_test.test_client() as c:
+                # Check we get all articles from the discovery API
+                resp0 = c.get(url_for('api_v3.search_articles', search_query='*'))
+                assert resp0.status_code == 200, resp0.status_code
+                assert len(resp0.json.get('results')) == 2, resp0.json
+
+                urlparams = {'page': 0, 'pageSize': 100}
+
+                # Perform a normal search via URL path with params
+                qs = urllib.parse.quote(a_title)
+                resp1 = c.get(url_for('api_v3.search_articles', search_query=qs, **urlparams))
+                assert resp1.status_code == 200, resp1.status_code
+                assert len(resp1.json.get('results')) == 1, resp1.json
+                assert resp1.json['results'][0]['bibjson']['title'] == a_title
+
+                # TODO: test ALL of the field short-hand names
+                qs = urllib.parse.quote('title:{}'.format(a_title))
+                resp1 = c.get(url_for('api_v3.search_articles', search_query=qs, **urlparams))
+                assert resp1.status_code == 200, resp1.status_code
+                assert len(resp1.json.get('results')) == 1, resp1.json
+                assert resp1.json['results'][0]['bibjson']['title'] == a_title
+
+                # todo: is this a good API design? Sending parameters in the body rather than the URL?
+                # # Perform an equivalent search with the query in the payload
+                # body_params = {'title': a_title}.update(urlparams)
+                # resp2 = c.get(url_for('api_v3.search_articles'), data=body_params)
+                # assert resp2.status_code == 200, resp2.status_code
+                # assert resp2.json == resp1.json
