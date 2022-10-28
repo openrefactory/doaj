@@ -29,7 +29,7 @@ setup(
         "freezegun==0.3.12",
         "GitPython==2.1.14",
         "gunicorn==19.9.0",
-        "huey==1.10.5",  # upgrading to 1.11 / 2.x requires work
+        "huey==2.4.4",
         "libsass==0.20.1",
         "LinkHeader==0.4.3",
         "lxml==4.8.0",
@@ -43,7 +43,7 @@ setup(
         "pycountry==19.8.18",
         "python-dateutil==2.8.0",  # something else already installs this, so just note we need it without an explicit version freeze
         "pytz==2019.3",
-        "redis==3.3.11",
+        "redis==4.3.4",
         "requests==2.22.0",
         "responses==0.10.6",
         "rstr==2.2.6",
