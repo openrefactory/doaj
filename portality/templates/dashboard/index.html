@@ -41,10 +41,6 @@
         Keep an eye on the <a href="{{ url_for('admin.suggestions') }}">ongoing applications</a> to make sure there are no processing delays.</span>
       </p>
     </div>
-    {% else %}
-    <h2 class="type-04">
-      You have <strong>{{ todos|length }}{% if todos|length >= config.get("TODO_LIST_SIZE")%}+{% endif %}</strong> applications in your priority list:
-    </h2>
     {% endif %}
     <ol class="todo-list">
       {% for todo in todos %}
