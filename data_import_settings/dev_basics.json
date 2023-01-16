@@ -7,7 +7,7 @@
 		"account" : {"import" : true, "limit" : -1},
 		"application" : {"import" : true, "limit" : -1},
 		"article" : {"import" : true, "limit" : 100000},
-		"background_job" : {"import" : false, "limit" : -1},
+		"background_job" : {"import" : true, "limit" : 10000},
 		"cache" : {"import" : false, "limit" : -1},
 		"editor_group" : {"import" : true, "limit" : -1},
 		"harvester_state" : {"import" : false, "limit" : -1},

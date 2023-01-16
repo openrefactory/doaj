@@ -23,6 +23,9 @@ def get_mappings(app):
         klazz = plugin.load_class_raw(cname)
         mappings[klazz.__type__] = {'mappings': klazz().mappings()}
 
+        # Always add the same dynamic mapping to keep consistency with our other types
+        mappings[klazz.__type__]['mappings'].update(app.config.get('DEFAULT_DYNAMIC_MAPPING', {}))
+
     return mappings
 
 
